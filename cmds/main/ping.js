@@ -1,14 +1,20 @@
-var handler = async (m, { conn, usedPrefix }) => {
+const handler = async (m, { conn }) => {
     const start = Date.now()
-    await m.react('⚡')
-    const end = Date.now()
-    const ping = end - start
+    
+    const sent = await conn.sendMessage(m.chat, {
+        text: '❏ *Pong!*'
+    }, { quoted: m })
 
-    await m.reply(`┏━━━━━━━━━━━━━━━━┓\n┃    🏮 *CharlyBot*    ┃\n┗━━━━━━━━━━━━━━━━┛\n\n⚡ *Ping:* ${ping}ms\n🟢 *Estado:* Online\n📡 *API:* api-charly.vercel.app\n\n━━━━━━━━━━━━━━━━━━━━\n⚡ *By Charly Developer*`)
+    const latency = Date.now() - start
+
+    await conn.sendMessage(m.chat, {
+        text: `✿ *Pong!*\n\n> *Tiempo de respuesta:* ${latency}ms`,
+        edit: sent.key
+    }, { quoted: m })
 }
 
 handler.help = ['ping']
 handler.tags = ['main']
-handler.command = ['ping', 'speed']
+handler.command = ['ping', 'p']
 
 export default handler
