@@ -60,6 +60,30 @@ var handler = async (m, { conn, usedPrefix }) => {
 > Info de perfil Instagram
 *${usedPrefix}wachannel*
 > Info canal WhatsApp
+*${usedPrefix}lyrics*
+> Letras de canciones
+
+━━━┫ *GRUPO / ADMIN* ┣━━━
+*${usedPrefix}kick*
+> Sacar a un miembro
+*${usedPrefix}promote*
+> Darle admin a alguien
+*${usedPrefix}demote*
+> Quitarle admin a alguien
+*${usedPrefix}del*
+> Borrar mensaje (cita)
+*${usedPrefix}tag*
+> Tagear a todos
+*${usedPrefix}link*
+> Obtener enlace del grupo
+*${usedPrefix}revoke*
+> Renovar enlace del grupo
+*${usedPrefix}open / ${usedPrefix}close*
+> Abrir o cerrar el grupo
+*${usedPrefix}setppgp*
+> Cambiar foto del grupo
+*${usedPrefix}setdescgp*
+> Cambiar descripción del grupo
 
 ━━━━━┫ *BOT* ┣━━━━
 *${usedPrefix}ping*

@@ -30,7 +30,7 @@ export default async function main(sock, m) {
         const rawText = m.text || m.body || ''
         const dict = rawText.trim()
 
-        // AFK
+        // AFK check
         if (user && user.afk > -1) {
             let tiempoAfk = Math.floor((Date.now() - user.afk) / 60000)
             await sock.sendMessage(m.chat, {
@@ -51,48 +51,69 @@ export default async function main(sock, m) {
         const args = text.split(/ +/).filter(v => v)
 
         const commandFile = await getCommand(commandName)
+        if (!commandFile) return
 
-        if (commandFile) {
-            if (user?.banned) return
-            if (m.isGroup && chat?.isBanned) return
+        if (user?.banned) return
+        if (m.isGroup && chat?.isBanned) return
 
-            const numberBot = sock.user.id.split(':')[0] + '@s.whatsapp.net'
-            const ownerList = Array.isArray(global.owner) ? global.owner : []
-            const isOwner = [numberBot, ...ownerList.map(v => (Array.isArray(v) ? v[0] : v).replace(/[^0-9]/g, '') + '@s.whatsapp.net')].includes(m.sender)
+        const numberBot = sock.user.id.split(':')[0] + '@s.whatsapp.net'
+        const ownerList = Array.isArray(global.owner) ? global.owner : []
+        const isOwner = [numberBot, ...ownerList.map(v => (Array.isArray(v) ? v[0] : v).replace(/[^0-9]/g, '') + '@s.whatsapp.net')].includes(m.sender)
 
-            const groupMetadata = m.isGroup ? await sock.groupMetadata(m.chat).catch(() => ({})) : {}
-            const participants = m.isGroup ? (groupMetadata.participants || []) : []
-            const userAdmins = participants.filter(p => p.admin !== null).map(p => p.id)
-            const isAdmins = m.isGroup ? userAdmins.includes(m.sender) : false
-            const isBotAdmins = m.isGroup ? userAdmins.includes(numberBot) : false
+        // Metadata del grupo
+        let groupMetadata = {}
+        let participants = []
+        let userAdmins = []
+        let isAdmins = false
+        let isBotAdmins = false
 
-            user.exp = (user.exp || 0) + 10
-            user.comandos = (user.comandos || 0) + 1
-            db.stats.totalCommands = (db.stats.totalCommands || 0) + 1
+        if (m.isGroup) {
+            try {
+                groupMetadata = await sock.groupMetadata(m.chat)
+                participants = groupMetadata.participants || []
+                userAdmins = participants.filter(p => p.admin !== null).map(p => p.id)
+                isAdmins = userAdmins.includes(m.sender)
+                isBotAdmins = userAdmins.includes(numberBot)
+            } catch {}
+        }
 
-            let { max } = xpRange(user.level || 0)
-            if (user.exp >= max) {
-                user.level = (user.level || 0) + 1
-                await sock.sendMessage(m.chat, {
-                    text: `🎊 ¡Subiste de nivel! Ahora eres nivel *${user.level}*`,
-                    mentions: [m.sender]
-                }, { quoted: m })
-            }
+        // Validaciones del comando
+        if (commandFile.group && !m.isGroup) return m.reply('⚠️ Este comando solo funciona en grupos.')
+        if (commandFile.admin && !isAdmins && !isOwner) return m.reply('⚠️ Solo *administradores* pueden usar este comando.')
+        if (commandFile.botAdmin && !isBotAdmins) return m.reply('⚠️ Necesito ser *administrador* del grupo para usar este comando.')
+        if (commandFile.owner && !isOwner) return m.reply('⚠️ Solo el *dueño* del bot puede usar este comando.')
 
-            console.log(chalk.green(`[EXE] ${commandName} | Por: ${m.sender.split('@')[0]}`))
+        // XP
+        user.exp = (user.exp || 0) + 10
+        user.comandos = (user.comandos || 0) + 1
+        db.stats.totalCommands = (db.stats.totalCommands || 0) + 1
 
-            const runMethod = commandFile.handler || commandFile.run ||
-                (typeof commandFile === 'function' ? commandFile : null) ||
-                commandFile.default?.handler || commandFile.default?.run
+        let { max } = xpRange(user.level || 0)
+        if (user.exp >= max) {
+            user.level = (user.level || 0) + 1
+            await sock.sendMessage(m.chat, {
+                text: `🎊 ¡Subiste de nivel! Ahora eres nivel *${user.level}*`,
+                mentions: [m.sender]
+            }, { quoted: m })
+        }
 
-            if (typeof runMethod === 'function') {
-                await runMethod(m, {
-                    sock, conn: sock, client: sock,
-                    text, args, usedPrefix, command: commandName,
-                    participants, isOwner, isAdmins, isBotAdmins,
-                    db, user, chat
-                })
-            }
+        console.log(chalk.green(`[EXE] ${commandName} | Por: ${m.sender.split('@')[0]}`))
+
+        const runMethod = commandFile.handler || commandFile.run ||
+            (typeof commandFile === 'function' ? commandFile : null) ||
+            commandFile.default?.handler || commandFile.default?.run
+
+        if (typeof runMethod === 'function') {
+            await runMethod(m, {
+                sock, conn: sock, client: sock,
+                text, args, usedPrefix, command: commandName,
+                participants, isOwner,
+                isAdmins, isBotAdmins,
+                isAdmin: isAdmins,
+                isBotAdmin: isBotAdmins,
+                db, user, chat,
+                groupMetadata
+            })
         }
     } catch (err) {
         console.error(chalk.red.bold('[!] ERROR:'), err)
