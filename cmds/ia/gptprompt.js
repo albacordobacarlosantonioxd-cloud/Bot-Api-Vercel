@@ -17,7 +17,7 @@ var handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
     try {
         const { data } = await axios.get(`${global.apiCharlyBase}/api/ai/gptprompt`, {
-            params: {
+            params, timeout: 600000: {
                 system: sistema.trim(),
                 q: mensaje,
                 key: global.apiCharlyKey

@@ -11,7 +11,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
             ? { url: query, key: global.apiCharlyKey }
             : { q: query, key: global.apiCharlyKey }
 
-        const { data } = await axios.get(`${global.apiCharlyBase}/api/ytplay`, { params })
+        const { data } = await axios.get(`${global.apiCharlyBase}/api/ytplay`, { params, timeout: 600000 })
 
         if (!data.status || !data.result) {
             await m.react('❌')

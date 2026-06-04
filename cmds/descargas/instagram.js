@@ -12,7 +12,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
         // Intentar con el endpoint principal
         const endpoint = command === 'igscraper' ? '/api/download/igscraper' : '/api/download/ig'
         const { data } = await axios.get(`${global.apiCharlyBase}${endpoint}`, {
-            params: { url, key: global.apiCharlyKey }
+            params, timeout: 600000: { url, key: global.apiCharlyKey }
         })
 
         if (!data.status || !data.result) {

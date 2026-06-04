@@ -10,7 +10,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
 
     try {
         const { data } = await axios.get(`${global.apiCharlyBase}/api/download/terabox`, {
-            params: { url, key: global.apiCharlyKey }
+            params, timeout: 600000: { url, key: global.apiCharlyKey }
         })
 
         if (!data.status || !data.result) {

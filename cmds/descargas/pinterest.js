@@ -8,7 +8,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
 
     try {
         const { data } = await axios.get(`${global.apiCharlyBase}/api/search/pinterest`, {
-            params: { q: query, key: global.apiCharlyKey }
+            params, timeout: 600000: { q: query, key: global.apiCharlyKey }
         })
 
         if (!data.status || !data.result?.length) {

@@ -8,7 +8,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
 
     try {
         const { data } = await axios.get(`${global.apiCharlyBase}/api/ai/text2img`, {
-            params: { prompt, key: global.apiCharlyKey }
+            params, timeout: 600000: { prompt, key: global.apiCharlyKey }
         })
 
         if (!data.status || (!data.result && !data.url && !data.image)) {

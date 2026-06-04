@@ -8,7 +8,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
 
     try {
         const { data } = await axios.get(`${global.apiCharlyBase}/api/tools/igstalk`, {
-            params: { username: user, key: global.apiCharlyKey }
+            params, timeout: 600000: { username: user, key: global.apiCharlyKey }
         })
 
         if (!data.status || !data.result) {
