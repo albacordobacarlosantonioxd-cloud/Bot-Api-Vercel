@@ -13,7 +13,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
         // Si no es URL, buscar primero
         if (!isUrl) {
             const { data: sData } = await axios.get(`${global.apiCharlyBase}/api/search/spotify`, {
-                params, timeout: 600000: { q: query, key: global.apiCharlyKey }
+                params: { q: query, key: global.apiCharlyKey }
             })
             if (!sData.status || !sData.result?.length) {
                 await m.react('❌')
@@ -24,7 +24,7 @@ var handler = async (m, { conn, text, usedPrefix, command }) => {
 
         // Descargar
         const { data } = await axios.get(`${global.apiCharlyBase}/api/download/spotify`, {
-            params, timeout: 600000: { url: trackUrl, key: global.apiCharlyKey }
+            params: { url: trackUrl, key: global.apiCharlyKey }
         })
 
         if (!data.status || !data.result) {
